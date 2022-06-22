@@ -5,7 +5,8 @@ const url = 'mongodb://localhost:27017/nucampsite'
 const connect = mongoose.connect(url, {
     useCreateIndex: true,
     useNewUrlParser: true,
-    useUnifiedTopology: true
+    useUnifiedTopology: true,
+    useFindAndModify: false,
 })
 
 connect.then(() => {
@@ -24,10 +25,30 @@ connect.then(() => {
     //newCampsite.save()
     .then(campsite => {
         console.log(campsite)
-        return Campsite.find()
+
+        return Campsite.findByIdAndUpdate(campsite._id, 
+        {
+            $set: {description: 'Updated Test Document'}
+        }, 
+        {
+            new: true//returns updated document rather than original
+        }
+        )
     })
-    .then(campsites => {
-        console.log(campsites);
+    .then(campsite => {
+        console.log(campsite)
+
+        campsite.comments.push({
+            rating: 5,
+            text: 'What a magnificent view!',
+            author: 'Tinus Lorvaldes'
+        })
+
+        return campsite.save()
+
+    })
+    .then(campsite => {
+        console.log(campsite);
         return Campsite.deleteMany()
     })
     .then(() => {
